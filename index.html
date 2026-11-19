@@ -29,14 +29,42 @@ main{max-width:1540px}.brand{gap:10px}.brand .mark{display:inline-flex;align-ite
 .workspace{grid-template-columns:minmax(0,1fr) minmax(220px,23%)}.chartpanel{grid-column:1;grid-row:1;background:#141a20;border-top:1px solid var(--line)}aside{grid-column:2;grid-row:1}.watchtitle{padding:15px}.watchitem{padding:14px}.chartpanel .price{font-size:24px}.quote{padding:8px 0 2px;border-top:1px solid var(--line)}#equityRange{display:flex;background:#0e1419;border-radius:5px;padding:2px}#equityRange button{background:transparent;border:0;padding:4px 9px}#equityRange button[aria-pressed=true]{color:var(--accent);background:#28323a}.primary{background:var(--accent)}.data{margin-top:16px}.tools{flex-wrap:wrap}
 @media(max-width:900px){.account{grid-template-columns:1fr}.metrics{margin:0;padding:8px;grid-template-columns:repeat(auto-fit,minmax(105px,1fr))}}
 @media(max-width:760px){.workspace{display:flex;flex-direction:column}.chartpanel{order:0}aside{order:1}.desk{margin-top:16px}.watchitem{padding:7px}.brand{flex-wrap:wrap;gap:5px}.terminalname{flex-basis:100%;font-size:11px}.desk span{font-size:10px}.balance{padding:10px 14px}.chartpanel .row{gap:8px}.metrics strong{font-size:15px}}
-</style></head><body><main><header><div class="brand"><span class="mark" aria-hidden="true">N<span>50</span></span><strong>Nifty 50</strong><span class="separator">/</span><span class="terminalname">Automated AI Trading</span></div><div class="tools"><small id="markettime"></small><button id="settings">Customize</button><button class="primary" id="open" aria-haspopup="dialog">↓ Download</button></div></header>
-<div class="desk"><h1>Portfolio workspace</h1><span>Simulated account</span></div><section class="account" aria-label="Account overview"><div class="balance"><small>Portfolio value</small><div class="hero" id="equity">—</div><div id="overall">Overall P&amp;L · —</div></div><div class="metrics"><div title="Based on dated closing statement records"><small>Today’s P&amp;L</small><strong id="daily">—</strong></div><div><small>Available cash</small><strong id="cash">—</strong></div><div><small>Position value</small><strong id="invested">—</strong></div><div><small>Realized P&amp;L</small><strong id="realized">—</strong></div><div><small>Open P&amp;L</small><strong id="openpnl">—</strong></div></div></section>
+
+:root{background:#101012;--line:#2b2b30;--muted:#afafb6;--green:#5be4a6;--red:#ff9d97}
+body{background:linear-gradient(145deg,#131316,#0d0d0f 75%);min-height:100vh}
+main{max-width:1600px;padding-left:clamp(84px,7vw,116px);padding-right:clamp(18px,3vw,48px)}
+.rail{position:fixed;inset:0 auto 0 0;width:58px;z-index:4;background:#151517;border-right:1px solid var(--line);display:flex;align-items:center;flex-direction:column;gap:13px;padding-top:85px}
+.rail a,.rail button{display:grid;place-items:center;border:0;border-radius:12px;text-decoration:none;width:36px;height:36px;font:24px/1 system-ui;color:#c2c1c9;background:transparent}
+.rail a:hover,.rail button:hover,.rail :focus-visible{background:#27292c;color:var(--accent)}
+header{padding:18px 0}.brand .mark{border-radius:11px;transform:rotate(-4deg)}.brand strong{font-weight:750}
+.desk{margin:24px 0 14px}.desk h1{font-size:clamp(28px,3.2vw,48px);line-height:1.1;font-weight:650;letter-spacing:-.065em}
+.desk span{border:1px solid var(--line);border-radius:20px;padding:4px 10px}
+.account{background:transparent;border:none;border-radius:0;gap:12px;grid-template-columns:minmax(220px,1fr) 2.4fr;overflow:visible}
+.balance,.metrics>div,.workspace>*,.data{background:#19191c;border:1px solid var(--line);border-radius:15px}
+.balance{display:flex;align-items:start;justify-content:center;flex-direction:column;padding:16px 20px;background:radial-gradient(ellipse at top right,#23392e,transparent 70%),#1a1a1c}
+.balance .hero{font-size:clamp(30px,3.1vw,48px);font-weight:650;letter-spacing:-.065em}.balance .primary{margin-top:12px;width:100%;background:var(--accent);border-radius:9px;color:#101514}
+.metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-content:stretch}
+.metrics>div{grid-column:span 2;padding:12px 15px;align-self:stretch}.metrics>div:nth-last-child(-n+2){grid-column:span 3;background:linear-gradient(125deg,#222126,#19191c 70%)}
+.metrics strong{font-weight:600;letter-spacing:-.04em}.workspace{gap:12px}.chartpanel{padding:18px}.chartpanel .price{font-weight:600;color:#f0eff3}
+.watchtitle{padding:14px 16px}.watchrow{border-color:var(--line)}.watchitem[aria-pressed=true]{background:#252a29}.watchitem small{color:#b8bac0}
+#equityRange,#frames{border-radius:18px;padding:3px;background:#101012}#equityRange button,#frames button{border-radius:16px}
+.data nav{padding:10px 12px;gap:4px}.data nav button{border-radius:18px;border:0;padding:5px 13px}.data nav [aria-pressed=true]{color:#101514;background:var(--accent)}
+th{background:#202023}th,td{border-color:#2d2d32}dialog{border-radius:18px;background:#1b1b20}
+@media(max-width:900px){main{padding-left:74px}.metrics{padding:0}.metrics>div{padding:9px}.account{grid-template-columns:minmax(190px,1fr) 2fr}}
+@media(max-width:760px){main{padding:0 12px 20px}.rail{display:none}.account{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(6,minmax(0,1fr))}.desk h1{font-size:29px}.desk span{font-size:10px}.balance{padding:14px 16px;display:grid;grid-template-columns:1fr auto}.balance small,.balance .hero,#overall{grid-column:1}.balance .primary{grid-column:2;grid-row:1/4;align-self:center;width:auto;margin:0}.chartpanel{padding:12px}}
+</style></head><body><div class="rail" aria-label="Workspace shortcuts" role="navigation">
+<a href="#overview" aria-label="Portfolio overview" title="Portfolio overview">▦</a>
+<a href="#panel" aria-label="Chart" title="Chart">⌁</a>
+<button data-tab="hold" aria-label="Open positions" title="Positions">▤</button>
+<button data-tab="trades" aria-label="Trade history" title="Trade history">↺</button>
+<button data-tab="sig" aria-label="AI signals" title="AI signals">≋</button></div><main id="overview"><header><div class="brand"><span class="mark" aria-hidden="true">N<span>50</span></span><strong>Nifty 50</strong><span class="separator">/</span><span class="terminalname">Automated AI Trading</span></div><div class="tools"><small id="markettime"></small><button id="settings">Customize</button></div></header>
+<div class="desk"><h1>Portfolio overview</h1><span>Simulated account</span></div><section class="account" aria-label="Account overview"><div class="balance"><small>Portfolio value</small><div class="hero" id="equity">—</div><div id="overall">Overall P&amp;L · —</div><button class="primary" id="open" aria-haspopup="dialog">↓ Download</button></div><div class="metrics"><div title="Based on dated closing statement records"><small>Today’s P&amp;L</small><strong id="daily">—</strong></div><div><small>Available cash</small><strong id="cash">—</strong></div><div><small>Position value</small><strong id="invested">—</strong></div><div><small>Realized P&amp;L</small><strong id="realized">—</strong></div><div><small>Open P&amp;L</small><strong id="openpnl">—</strong></div></div></section>
 <div class="workspace"><aside id="aside"><div class="watchtitle"><h2>Watchlist</h2><button id="collapse" class="minor">Hide</button></div><div id="watch"></div></aside>
 <section class="chartpanel" id="panel"><div class="row"><div><select id="pick" aria-label="Select instrument" hidden></select><h1 id="symbol">RELIANCE</h1><div class="price" id="chartprice">—</div></div><div class="tools"><div id="equityRange" aria-label="Equity chart range"><button data-range="hour">1H</button><button data-range="session">Session</button><button data-range="recent">Recent</button></div><div id="frames" aria-label="Timeframe"><button data-min="1">1m</button><button data-min="5">5m</button><button data-min="15">15m</button></div><button id="full" aria-label="Expand chart">Expand</button><button id="connect">Connect Google</button></div></div>
 <p id="chartcaption" class="muted" role="status"></p><canvas id="plot" tabindex="0" role="img" aria-label="Price chart"></canvas><div id="readout" class="quote">—</div></section></div>
 <section class="data" id="activity"><nav aria-label="Account activity"><button id="hold">Positions</button><button id="trades">Trade history</button><button id="sig">AI signals</button></nav><div class="scroll"><table><thead id="head"></thead><tbody id="rows"></tbody></table></div></section><footer id="stamp">Reading account… · Simulated account</footer></main>
 <dialog id="prefs" aria-labelledby="prefsTitle"><div class="row"><h2 id="prefsTitle">Customize terminal</h2><button id="done">Done</button></div><div class="pair">
-<label>Accent<select id="accent"><option value="cyan">Ice cyan</option><option value="blue">Steel blue</option><option value="silver">Silver</option></select></label>
+<label>Accent<select id="accent"><option value="mint">Mint</option><option value="lilac">Lilac</option><option value="cyan">Ice cyan</option><option value="blue">Steel blue</option><option value="silver">Silver</option></select></label>
 <label>Chart height<select id="height"><option value="standard">Standard</option><option value="tall">Tall</option><option value="short">Short</option></select></label>
 <label>Opening instrument<select id="home"></select></label>
 <label>Default timeframe<select id="periodMin"><option value="1">1 minute</option><option value="5">5 minutes</option><option value="15">15 minutes</option></select></label></div>
@@ -92,9 +120,9 @@ const tint=n=>n>0?'gain':n<0?'loss':'';
 let snapshot={}, mode='hold', hasRead=false, selected='';
 try{const prior=localStorage.getItem('nifty.chartSymbol');if(['RELIANCE','HDFCBANK','ICICIBANK','INFY','TCS',''].includes(prior))selected=prior;}catch{}
 const symbols=['RELIANCE','HDFCBANK','ICICIBANK','INFY','TCS',''];
-const colors={cyan:'#77d5e1',blue:'#9cb7ea',silver:'#c6cbd3'};
+const colors={mint:'#55edac',lilac:'#c7acff',cyan:'#77d5e1',blue:'#9cb7ea',silver:'#c6cbd3'};
 const heights={standard:'clamp(290px,39vh,480px)',tall:'clamp(360px,52vh,660px)',short:'250px'};
-const defaults={accent:'cyan',height:'standard',home:'last',periodMin:'5',compact:false,watchVisible:true,activityVisible:true,markers:true,pins:[]};
+const defaults={accent:'mint',height:'standard',home:'last',periodMin:'5',compact:false,watchVisible:true,activityVisible:true,markers:true,pins:[]};
 let prefs={...defaults},minute='5',hoverY=null,closes=new Map();
 try{Object.assign(prefs,JSON.parse(localStorage.getItem('nifty.layout')||'{}'));}catch{}
 if(!Array.isArray(prefs.pins))prefs.pins=[];
@@ -407,5 +435,12 @@ async function exportCsv(){clearReady();const seq=++run;lock(true);
  consume(tail+decoder.decode());if(!count)throw Error('No records in this time range.');
  objectURL=URL.createObjectURL(new Blob(chunks,{type:'text/csv;charset=utf-8'}));output(objectURL,kind+'_'+(span?span.join('_').replace(/:/g,'-'):'history')+'.csv');
  }catch(e){if(seq===run)$('msg').textContent=e.message||String(e);}finally{if(seq===run)lock(false);}}
+for(const shortcut of document.querySelectorAll('.rail button[data-tab]')){
+ shortcut.onclick=()=>{
+  if(!prefs.activityVisible){prefs.activityVisible=true;savePrefs();applyLayout();}
+  $(shortcut.dataset.tab).click();
+  $('activity').scrollIntoView({block:'start'});
+ };
+}
 $('save').onclick=exportCsv;setupWatch();applyLayout();render();draw();poll();
 </script></body></html>
