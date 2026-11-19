@@ -1,202 +1,129 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nifty50 AI Live Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-</head>
-<body class="bg-slate-900 text-white min-h-screen">
-    
-    <!-- Top Navigation / Status -->
-    <nav class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse" id="live-indicator"></div>
-            <h1 class="text-xl font-bold tracking-wider">NIFTY50 AI <span class="text-slate-400 font-normal">| Live Terminal</span></h1>
-        </div>
-        <div class="text-sm text-slate-400" id="last-updated">
-            Last Update: Waiting for Kaggle...
-        </div>
-    </nav>
-
-    <div class="max-w-7xl mx-auto p-6 space-y-6">
-        
-        <!-- Top Stats Row -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Balance Card -->
-            <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
-                <h3 class="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">Available Balance</h3>
-                <div class="text-4xl font-bold text-white mb-2" id="balance">₹10,00,000</div>
-                <div class="text-sm text-slate-400">Paper Trading Capital</div>
-            </div>
-
-            <!-- PnL Card -->
-            <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
-                <h3 class="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">Net P&L</h3>
-                <div class="text-4xl font-bold text-slate-500" id="pnl">₹0.00</div>
-                <div class="text-sm text-slate-400">Total Profit / Loss</div>
-            </div>
-
-            <!-- Bot Status Card -->
-            <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
-                <h3 class="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">System Status</h3>
-                <div class="flex items-center space-x-2 mb-2">
-                    <span class="text-2xl font-bold text-blue-400" id="status-text">LISTENING</span>
-                </div>
-                <div class="text-sm text-slate-400">Monitoring 5 symbols...</div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Left Column: Signals Table -->
-            <div class="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 shadow-lg overflow-hidden">
-                <div class="p-5 border-b border-slate-700 flex justify-between items-center">
-                    <h2 class="text-lg font-bold">Live AI Signals</h2>
-                    <span class="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded">Last 5 Stocks</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-900/50 text-slate-400">
-                            <tr>
-                                <th class="py-3 px-5 font-semibold">Symbol</th>
-                                <th class="py-3 px-5 font-semibold">Live Price</th>
-                                <th class="py-3 px-5 font-semibold">Action</th>
-                                <th class="py-3 px-5 font-semibold">Confidence</th>
-                                <th class="py-3 px-5 font-semibold">Time</th>
-                            </tr>
-                        </thead>
-                        <tbody id="signals-table" class="divide-y divide-slate-700/50">
-                            <tr>
-                                <td colspan="5" class="py-8 text-center text-slate-500">Waiting for data from Kaggle...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Right Column: Open Positions -->
-            <div class="bg-slate-800 rounded-xl border border-slate-700 shadow-lg flex flex-col">
-                <div class="p-5 border-b border-slate-700">
-                    <h2 class="text-lg font-bold flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                        Open Positions
-                    </h2>
-                </div>
-                <div class="p-5 flex-1 flex flex-col space-y-3" id="open-positions">
-                    <div class="text-slate-500 text-center py-8">
-                        No open positions right now.<br>
-                        <span class="text-xs mt-2 inline-block text-slate-600">Waiting for AI confidence > 75%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Firebase Connection Script -->
-    <script>
-        // Your specific Firebase Database URL!
-        const FIREBASE_URL = "https://niftybot-73b5f-default-rtdb.firebaseio.com/live_data.json";
-
-        async function fetchLiveUpdates() {
-            try {
-                const response = await fetch(FIREBASE_URL);
-                if (!response.ok) return;
-                
-                const data = await response.json();
-                if (!data) return;
-
-                // 1. Update Balance & PnL
-                if (data.balance !== undefined) {
-                    document.getElementById('balance').innerText = "₹" + parseFloat(data.balance).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                }
-                
-                if (data.pnl !== undefined) {
-                    const pnlEl = document.getElementById('pnl');
-                    const pnlVal = parseFloat(data.pnl);
-                    if (pnlVal > 0) {
-                        pnlEl.innerText = "+₹" + pnlVal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                        pnlEl.className = "text-4xl font-bold text-green-500";
-                    } else if (pnlVal < 0) {
-                        pnlEl.innerText = "-₹" + Math.abs(pnlVal).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                        pnlEl.className = "text-4xl font-bold text-red-500";
-                    } else {
-                        pnlEl.innerText = "₹0.00";
-                        pnlEl.className = "text-4xl font-bold text-slate-500";
-                    }
-                }
-
-                // 2. Update Status Time
-                const now = new Date();
-                document.getElementById('last-updated').innerText = "Last Update: " + now.toLocaleTimeString();
-
-                // 3. Update Signals Table
-                if (data.signals) {
-                    let tableHTML = "";
-                    for (const [symbol, sig] of Object.entries(data.signals)) {
-                        let badgeColor = "bg-slate-600 text-white";
-                        if (sig.action === "BUY") badgeColor = "bg-green-500/20 text-green-400 border border-green-500/30";
-                        if (sig.action === "SELL") badgeColor = "bg-red-500/20 text-red-400 border border-red-500/30";
-                        
-                        tableHTML += `
-                            <tr class="hover:bg-slate-700/30 transition-colors">
-                                <td class="py-3 px-5 font-medium text-white">${symbol}</td>
-                                <td class="py-3 px-5 font-mono">₹${parseFloat(sig.price).toFixed(2)}</td>
-                                <td class="py-3 px-5"><span class="px-3 py-1 rounded-full text-xs font-bold ${badgeColor}">${sig.action}</span></td>
-                                <td class="py-3 px-5 text-slate-300">${parseFloat(sig.confidence).toFixed(1)}%</td>
-                                <td class="py-3 px-5 text-slate-400 text-xs">${sig.time}</td>
-                            </tr>
-                        `;
-                    }
-                    document.getElementById('signals-table').innerHTML = tableHTML;
-                }
-
-                // 4. Update Open Positions
-                if (data.positions && data.positions.length > 0) {
-                    let posHTML = "";
-                    data.positions.forEach(pos => {
-                        let pnlColor = pos.unrealized_pnl >= 0 ? "text-green-400" : "text-red-400";
-                        let pnlSign = pos.unrealized_pnl >= 0 ? "+" : "";
-                        posHTML += `
-                            <div class="bg-slate-700/50 p-4 rounded-lg border border-slate-600">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div class="font-bold">${pos.symbol}</div>
-                                    <div class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded">LONG</div>
-                                </div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="text-slate-400">Qty: ${pos.qty}</span>
-                                    <span class="font-mono">Entry: ₹${pos.entry_price.toFixed(2)}</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-slate-400">Current PnL:</span>
-                                    <span class="font-bold font-mono ${pnlColor}">${pnlSign}₹${pos.unrealized_pnl.toFixed(2)}</span>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    document.getElementById('open-positions').innerHTML = posHTML;
-                } else {
-                    document.getElementById('open-positions').innerHTML = `
-                        <div class="text-slate-500 text-center py-8">
-                            No open positions right now.<br>
-                            <span class="text-xs mt-2 inline-block text-slate-600">Waiting for AI confidence > 75%</span>
-                        </div>
-                    `;
-                }
-
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        }
-
-        // Fetch data from Kaggle every 2 seconds automatically!
-        setInterval(fetchLiveUpdates, 2000);
-        fetchLiveUpdates();
-    </script>
-</body>
-</html>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nifty50 AI · Paper trading</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{color-scheme:dark;--page:#0e1726;--card:#172438;--line:#344459;--muted:#b0bfd0;--green:#72ddb6;--red:#ff9299}
+*{box-sizing:border-box}body{margin:0;background:var(--page);color:#f4f7fb;font:15px/1.5 Inter,system-ui,sans-serif}header{border-bottom:1px solid var(--line)}header>div,main{max-width:1180px;margin:auto;padding:18px 24px}header>div,.controls,.between{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.between,header>div{justify-content:space-between}h1,h2,p{margin:0}h1{font-size:21px}h2{font-size:18px;margin-bottom:12px}.muted,small,label,th,summary{color:var(--muted)}main{display:grid;gap:16px}.cards,.lower{display:grid;gap:14px}.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.lower{grid-template-columns:2fr 1fr}.box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;min-width:0}.number{display:block;font-size:clamp(22px,3vw,32px);font-variant-numeric:tabular-nums}.pos{color:var(--green)}.neg{color:var(--red)}.controls{align-items:end;margin:12px 0}.controls label{display:grid;gap:4px}button,input{font:inherit;border-radius:6px;padding:8px 12px;border:1px solid #556981;background:#0f1b2c;color:#eef3fa}button{cursor:pointer;font-weight:600}button:disabled{opacity:.5;cursor:default}button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--green)}#connect{background:#a6efd3;color:#10291f;border-color:transparent}details{margin-top:10px}summary{cursor:pointer;width:fit-content}details input{width:min(100%,480px)}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}td,th{padding:8px;text-align:left;border-bottom:1px solid var(--line)}th{font-size:12px}.holding{padding:8px 0;border-bottom:1px solid var(--line)}.holding small{display:block}@media(max-width:700px){.lower,.cards{grid-template-columns:1fr}.box{padding:15px}main,header>div{padding:14px}.controls{gap:8px}}
+</style>
+</head><body>
+<header><div><h1>NIFTY50 AI <span class="muted">/ Live terminal</span></h1><small id="live">Reading Firebase…</small></div></header>
+<main>
+<div class="cards">
+<section class="box"><span class="muted">Portfolio value</span><strong class="number" id="equity">—</strong></section>
+<section class="box"><span class="muted">Available cash</span><strong class="number" id="cash">—</strong></section>
+<section class="box"><span class="muted">Overall paper P&amp;L · before fees</span><strong class="number" id="pnl">—</strong></section>
+</div>
+<section class="box"><div class="between"><h2>Daily downloads</h2><small>Trading dates in IST</small></div>
+<div class="controls"><label>Trading date<input type="date" id="day"></label><button id="connect">Connect Google Drive</button><button id="candles" disabled>Download 1-second data</button><button id="statement" disabled>Download trade statement</button></div>
+<p class="muted" id="feedback" role="status">Connect the Google account that can read your Kaggle archive folder.</p>
+<details id="settings"><summary>Drive connection settings</summary>
+<p><label>Google OAuth web client ID<br><input id="client" placeholder="…apps.googleusercontent.com" autocomplete="off"></label></p>
+<small>Enable the Google Drive API for this client and register this site's origin in Google Cloud. Use HTTPS or localhost. Only the client ID belongs here.</small></details>
+</section>
+<div class="lower"><section class="box"><h2>Live AI signals</h2><div class="scroll"><table><thead><tr><th>Symbol</th><th>Price</th><th>Action</th><th>Confidence</th><th>Time (IST)</th></tr></thead><tbody id="signals"></tbody></table></div></section>
+<section class="box"><h2>Open positions</h2><div id="positions" class="muted">Waiting for Firebase…</div></section></div>
+</main>
+<script>
+'use strict';
+const FOLDER = '1Rvkweq4G6JKMfoupF6LWnzqzt-mMlrnQ';
+const FIREBASE = 'https://niftybot-73b5f-default-rtdb.firebaseio.com/live_data.json';
+const $ = id => document.getElementById(id);
+const money = new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'});
+const format = n => n == null || !Number.isFinite(Number(n)) ? '—' : money.format(n);
+function element(tag, value, cls=''){const e=document.createElement(tag);e.textContent=value;e.className=cls;return e;}
+function color(n){return n>0?'pos':n<0?'neg':'';}
+function showPortfolio(data){
+  $('equity').textContent=format(data.balance); $('cash').textContent=format(data.cash);
+  $('pnl').textContent=format(data.pnl); $('pnl').className='number '+color(data.pnl);
+  const body=$('signals'); body.replaceChildren();
+  for(const [symbol,s] of Object.entries(data.signals||{}).sort(([a],[b])=>a.localeCompare(b))){
+    const row=document.createElement('tr');
+    for(const v of [symbol,format(s.price),s.action,Number(s.confidence).toFixed(1)+'%',s.time]) row.append(element('td',v));
+    body.append(row);
+  }
+  if(!body.children.length){const row=body.insertRow();const cell=row.insertCell();cell.colSpan=5;cell.textContent='No signals recorded.';}
+  const positions=$('positions');positions.replaceChildren();
+  for(const p of Object.values(data.positions||{})){
+    const card=element('div','','holding');card.append(element('strong',p.symbol),
+      element('small',p.qty+' shares · Entry '+format(p.entry_price)),
+      element('span','Open P&L '+format(p.unrealized_pnl),color(p.unrealized_pnl)));positions.append(card);
+  }
+  if(!positions.children.length) positions.textContent='No open positions.';
+}
+async function poll(){
+  try{const r=await fetch(FIREBASE,{cache:'no-store',signal:AbortSignal.timeout(8000)});
+    if(!r.ok) throw Error('HTTP '+r.status);
+    const data=await r.json();showPortfolio(data||{});
+    $('live').textContent=data?'Snapshot read at '+new Date().toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata'})+' IST':'Waiting for the first snapshot';
+  }catch(e){$('live').textContent='Firebase unavailable · '+e.message;}
+  finally{setTimeout(poll,2500);}
+}
+const parts=new Intl.DateTimeFormat('en-GB',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:'Asia/Kolkata'}).formatToParts(new Date());
+const value=t=>parts.find(p=>p.type===t).value;
+$('day').value=[value('year'),value('month'),value('day')].join('-');
+try{$('client').value=localStorage.getItem('nifty.webClient')||'';}catch{}
+let token='', expiry=0, busy=false;
+function buttons(){for(const k of ['candles','statement']) $(k).disabled=busy||!token||!$('day').value;
+  $('connect').disabled=busy;$('day').disabled=busy;}
+function message(s){$('feedback').textContent=s;}
+$('day').onchange=buttons;
+$('connect').onclick=()=>{
+  const id=$('client').value.trim();
+  if(!id.endsWith('.apps.googleusercontent.com')){$('settings').open=true;$('client').focus();message('Enter the OAuth web client ID in connection settings.');return;}
+  if(location.protocol==='file:'){message('Open this dashboard on HTTPS or localhost to connect Google Drive.');return;}
+  if(!window.google?.accounts?.oauth2){message('Google sign-in did not load. Check the connection and reload.');return;}
+  try{localStorage.setItem('nifty.webClient',id);}catch{}
+  const reset=msg=>{busy=false;buttons();message(msg);};
+  try{busy=true;buttons();
+    google.accounts.oauth2.initTokenClient({client_id:id,scope:'https://www.googleapis.com/auth/drive.readonly',
+      callback:r=>{if(!r.access_token){reset('Google authorization failed. Reconnect to try again.');return;}
+        token=r.access_token;expiry=Date.now()+Number(r.expires_in)*1000;$('settings').open=false;reset('Drive connected. Select a trading date and download a CSV.');},
+      error_callback:()=>reset('Sign-in did not finish. Use Connect Google Drive to retry.')
+    }).requestAccessToken();
+  }catch(e){reset(e.message);}
+};
+async function drive(path,params){
+  if(Date.now()>=expiry){token='';throw Error('Drive session expired. Connect again.');}
+  const url='https://www.googleapis.com/drive/v3/files'+path+'?'+new URLSearchParams(params);
+  const r=await fetch(url,{headers:{Authorization:'Bearer '+token}});
+  if(r.status===401){token='';throw Error('Drive session expired. Connect again.');}
+  if(!r.ok)throw Error('Google Drive: '+((await r.json()).error?.message||r.status));
+  return r;
+}
+async function listParts(kind,day){
+  const prefix=kind+'_'+day+'_';let page='',files=[];
+  do{
+    const params={q:"'"+FOLDER+"' in parents and trashed=false and name contains '"+prefix+"'",
+      fields:'nextPageToken,files(id,name)',pageSize:'1000',supportsAllDrives:'true',includeItemsFromAllDrives:'true'};
+    if(page)params.pageToken=page;
+    const data=await (await drive('',params)).json();files.push(...(data.files||[]));page=data.nextPageToken||'';
+  }while(page);
+  return files.filter(f=>f.name.startsWith(prefix)&&f.name.endsWith('.csv')).sort((a,b)=>a.name.localeCompare(b.name));
+}
+async function download(kind){
+  const day=$('day').value;if(!day||busy)return;
+  busy=true;buttons();
+  try{
+    message('Checking saved files…');const files=await listParts(kind,day);
+    if(!files.length){message('No '+(kind==='candles'?'one-second data':'trade statement')+' found for '+day+'. Check the account and the Kaggle Drive verification log.');return;}
+    let header;const chunks=[];
+    for(const [i,f] of files.entries()){
+      message('Reading file '+(i+1)+' of '+files.length+'…');
+      const csv=(await (await drive('/'+encodeURIComponent(f.id),{alt:'media',supportsAllDrives:'true'})).text()).replace(/^\uFEFF/,'');
+      const end=csv.indexOf('\n');if(end<0)throw Error('Incomplete CSV in '+f.name);
+      const first=csv.slice(0,end).trimEnd();
+      if(header===undefined){header=first;chunks.push(header+'\r\n');}
+      if(first!==header)throw Error('CSV columns differ in '+f.name+'. Download the original files from Drive.');
+      const rows=csv.slice(end+1);if(rows)chunks.push(rows.endsWith('\n')?rows:rows+'\r\n');
+    }
+    const url=URL.createObjectURL(new Blob(chunks,{type:'text/csv;charset=utf-8'}));
+    const a=document.createElement('a');a.href=url;a.download=kind+'_'+day+'.csv';document.body.append(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);message('Downloaded '+a.download+' from '+files.length+' saved file(s).');
+  }catch(e){message(e.message);}finally{busy=false;buttons();}
+}
+for(const k of ['candles','statement']) $(k).onclick=()=>download(k);
+poll();
+</script></body></html>
