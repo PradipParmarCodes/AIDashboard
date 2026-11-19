@@ -7,22 +7,28 @@
 <style>
 :root{color-scheme:dark;--page:#0e1726;--card:#172438;--line:#344459;--muted:#b0bfd0;--green:#72ddb6;--red:#ff9299}
 *{box-sizing:border-box}body{margin:0;background:var(--page);color:#f4f7fb;font:15px/1.5 Inter,system-ui,sans-serif}header{border-bottom:1px solid var(--line)}header>div,main{max-width:1180px;margin:auto;padding:18px 24px}header>div,.controls,.between{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.between,header>div{justify-content:space-between}h1,h2,p{margin:0}h1{font-size:21px}h2{font-size:18px;margin-bottom:12px}.muted,small,label,th,summary{color:var(--muted)}main{display:grid;gap:16px}.cards,.lower{display:grid;gap:14px}.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.lower{grid-template-columns:2fr 1fr}.box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;min-width:0}.number{display:block;font-size:clamp(22px,3vw,32px);font-variant-numeric:tabular-nums}.pos{color:var(--green)}.neg{color:var(--red)}.controls{align-items:end;margin:12px 0}.controls label{display:grid;gap:4px}button,input{font:inherit;border-radius:6px;padding:8px 12px;border:1px solid #556981;background:#0f1b2c;color:#eef3fa}button{cursor:pointer;font-weight:600}button:disabled{opacity:.5;cursor:default}button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--green)}#connect{background:#a6efd3;color:#10291f;border-color:transparent}details{margin-top:10px}summary{cursor:pointer;width:fit-content}details input{width:min(100%,480px)}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}td,th{padding:8px;text-align:left;border-bottom:1px solid var(--line)}th{font-size:12px}.holding{padding:8px 0;border-bottom:1px solid var(--line)}.holding small{display:block}@media(max-width:700px){.lower,.cards{grid-template-columns:1fr}.box{padding:15px}main,header>div{padding:14px}.controls{gap:8px}}
+dialog{width:min(660px,calc(100vw - 28px));color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;max-height:85vh}dialog::backdrop{background:rgb(2 8 18 / 0.78)}dialog .controls{align-items:center}#downloads{background:var(--green);color:#12372b}.metrics{display:flex;flex-wrap:wrap;gap:16px 40px}.metrics div{display:grid}.metrics strong{font-variant-numeric:tabular-nums}header small{margin-left:auto}@media(max-width:700px){header small{margin-left:0}}
 </style>
 </head><body>
-<header><div><h1>NIFTY50 AI <span class="muted">/ Live terminal</span></h1><small id="live">Reading Firebase…</small></div></header>
+<header><div><h1>NIFTY50 AI <span class="muted">/ Live terminal</span></h1><small id="live">Reading Firebase…</small><button id="downloads" aria-haspopup="dialog">Download</button></div></header>
 <main>
 <div class="cards">
 <section class="box"><span class="muted">Portfolio value</span><strong class="number" id="equity">—</strong></section>
 <section class="box"><span class="muted">Available cash</span><strong class="number" id="cash">—</strong></section>
 <section class="box"><span class="muted">Overall paper P&amp;L · before fees</span><strong class="number" id="pnl">—</strong></section>
 </div>
-<section class="box"><div class="between"><h2>Daily downloads</h2><small>Trading dates in IST</small></div>
-<div class="controls"><label>Trading date<input type="date" id="day"></label><button id="connect">Connect Google Drive</button><button id="candles" disabled>Download 1-second data</button><button id="statement" disabled>Download trade statement</button></div>
+<section class="box"><h2>Position summary</h2><div class="metrics">
+<div><small>Realized P&amp;L</small><strong id="realized">—</strong></div>
+<div><small>Open P&amp;L</small><strong id="unrealized">—</strong></div>
+<div><small>Position value</small><strong id="exposure">—</strong></div>
+<div><small>Open positions</small><strong id="count">—</strong></div></div></section>
+<dialog id="archive" aria-labelledby="archive-title"><div class="between"><h2 id="archive-title">Download archive</h2><button id="dismiss" aria-label="Close download dialog">Close</button></div><p class="muted">Leave the date blank for the full history. Dates use IST.</p>
+<div class="controls"><label>Filter by date (blank for all)<input type="date" id="day"></label><button id="connect">Connect Google Drive</button><button id="candles" disabled>Download 1-second data</button><button id="statement" disabled>Download trade statement</button></div>
 <p class="muted" id="feedback" role="status">Connect the Google account that can read your Kaggle archive folder.</p>
 <details id="settings"><summary>Drive connection settings</summary>
 <p><label>Google OAuth web client ID<br><input id="client" placeholder="…apps.googleusercontent.com" autocomplete="off"></label></p>
 <small>Enable the Google Drive API for this client and register this site's origin in Google Cloud. Use HTTPS or localhost. Only the client ID belongs here.</small></details>
-</section>
+</dialog>
 <div class="lower"><section class="box"><h2>Live AI signals</h2><div class="scroll"><table><thead><tr><th>Symbol</th><th>Price</th><th>Action</th><th>Confidence</th><th>Time (IST)</th></tr></thead><tbody id="signals"></tbody></table></div></section>
 <section class="box"><h2>Open positions</h2><div id="positions" class="muted">Waiting for Firebase…</div></section></div>
 </main>
@@ -36,6 +42,14 @@ const format = n => n == null || !Number.isFinite(Number(n)) ? '—' : money.for
 function element(tag, value, cls=''){const e=document.createElement(tag);e.textContent=value;e.className=cls;return e;}
 function color(n){return n>0?'pos':n<0?'neg':'';}
 function showPortfolio(data){
+  const holdings=Object.values(data.positions||{});
+  const hasPortfolio=data.balance!=null;
+  const open=hasPortfolio?holdings.reduce((sum,p)=>sum+Number(p.unrealized_pnl),0):null;
+  for(const [id,val] of [['realized',data.realized_pnl],['unrealized',open]]){
+    $(id).textContent=format(val);$(id).className=color(val);
+  }
+  $('exposure').textContent=format(hasPortfolio && data.cash!=null ? data.balance-data.cash : null);
+  $('count').textContent=hasPortfolio?holdings.length:'—';
   $('equity').textContent=format(data.balance); $('cash').textContent=format(data.cash);
   $('pnl').textContent=format(data.pnl); $('pnl').className='number '+color(data.pnl);
   const body=$('signals'); body.replaceChildren();
@@ -61,12 +75,11 @@ async function poll(){
   }catch(e){$('live').textContent='Firebase unavailable · '+e.message;}
   finally{setTimeout(poll,2500);}
 }
-const parts=new Intl.DateTimeFormat('en-GB',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:'Asia/Kolkata'}).formatToParts(new Date());
-const value=t=>parts.find(p=>p.type===t).value;
-$('day').value=[value('year'),value('month'),value('day')].join('-');
+$('downloads').onclick=()=>$('archive').showModal();
+$('dismiss').onclick=()=>$('archive').close();
 try{$('client').value=localStorage.getItem('nifty.webClient')||'';}catch{}
 let token='', expiry=0, busy=false;
-function buttons(){for(const k of ['candles','statement']) $(k).disabled=busy||!token||!$('day').value;
+function buttons(){for(const k of ['candles','statement']) $(k).disabled=busy||!token;
   $('connect').disabled=busy;$('day').disabled=busy;}
 function message(s){$('feedback').textContent=s;}
 $('day').onchange=buttons;
@@ -80,7 +93,7 @@ $('connect').onclick=()=>{
   try{busy=true;buttons();
     google.accounts.oauth2.initTokenClient({client_id:id,scope:'https://www.googleapis.com/auth/drive.readonly',
       callback:r=>{if(!r.access_token){reset('Google authorization failed. Reconnect to try again.');return;}
-        token=r.access_token;expiry=Date.now()+Number(r.expires_in)*1000;$('settings').open=false;reset('Drive connected. Select a trading date and download a CSV.');},
+        token=r.access_token;expiry=Date.now()+Number(r.expires_in)*1000;$('settings').open=false;reset('Drive connected. Download all dates or choose a date to filter.');},
       error_callback:()=>reset('Sign-in did not finish. Use Connect Google Drive to retry.')
     }).requestAccessToken();
   }catch(e){reset(e.message);}
@@ -94,21 +107,22 @@ async function drive(path,params){
   return r;
 }
 async function listParts(kind,day){
-  const prefix=kind+'_'+day+'_';let page='',files=[];
+  const name=kind+'_all.csv';let page='',files=[];
   do{
-    const params={q:"'"+FOLDER+"' in parents and trashed=false and name contains '"+prefix+"'",
+    const params={q:"'"+FOLDER+"' in parents and trashed=false and name='"+name+"'",
       fields:'nextPageToken,files(id,name)',pageSize:'1000',supportsAllDrives:'true',includeItemsFromAllDrives:'true'};
     if(page)params.pageToken=page;
     const data=await (await drive('',params)).json();files.push(...(data.files||[]));page=data.nextPageToken||'';
   }while(page);
-  return files.filter(f=>f.name.startsWith(prefix)&&f.name.endsWith('.csv')).sort((a,b)=>a.name.localeCompare(b.name));
+  return files.filter(f=>f.name===name).sort((a,b)=>a.name.localeCompare(b.name));
 }
 async function download(kind){
-  const day=$('day').value;if(!day||busy)return;
+  const day=$('day').value;if(busy)return;
   busy=true;buttons();
   try{
     message('Checking saved files…');const files=await listParts(kind,day);
-    if(!files.length){message('No '+(kind==='candles'?'one-second data':'trade statement')+' found for '+day+'. Check the account and the Kaggle Drive verification log.');return;}
+    if(files.length>1)throw Error('Duplicate master files in the archive folder.');
+    if(!files.length){message('No '+(kind==='candles'?'one-second data':'trade statement')+' master file found. Check the account and the Kaggle Drive verification log.');return;}
     let header;const chunks=[];
     for(const [i,f] of files.entries()){
       message('Reading file '+(i+1)+' of '+files.length+'…');
@@ -117,10 +131,10 @@ async function download(kind){
       const first=csv.slice(0,end).trimEnd();
       if(header===undefined){header=first;chunks.push(header+'\r\n');}
       if(first!==header)throw Error('CSV columns differ in '+f.name+'. Download the original files from Drive.');
-      const rows=csv.slice(end+1);if(rows)chunks.push(rows.endsWith('\n')?rows:rows+'\r\n');
+      let rows=csv.slice(end+1);if(day){rows=rows.split(/\r?\n/).filter(row=>row.startsWith(day+'T')).join('\r\n');if(!rows){message('No rows for '+day+'.');return;}}if(rows)chunks.push(rows.endsWith('\n')?rows:rows+'\r\n');
     }
     const url=URL.createObjectURL(new Blob(chunks,{type:'text/csv;charset=utf-8'}));
-    const a=document.createElement('a');a.href=url;a.download=kind+'_'+day+'.csv';document.body.append(a);a.click();a.remove();
+    const a=document.createElement('a');a.href=url;a.download=kind+'_'+(day||'all')+'.csv';document.body.append(a);a.click();a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),60000);message('Downloaded '+a.download+' from '+files.length+' saved file(s).');
   }catch(e){message(e.message);}finally{busy=false;buttons();}
 }
