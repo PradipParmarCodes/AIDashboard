@@ -52,16 +52,25 @@ header{padding:18px 0}.brand .mark{border-radius:11px;transform:rotate(-4deg)}.b
 th{background:#202023}th,td{border-color:#2d2d32}dialog{border-radius:18px;background:#1b1b20}
 @media(max-width:900px){main{padding-left:74px}.metrics{padding:0}.metrics>div{padding:9px}.account{grid-template-columns:minmax(190px,1fr) 2fr}}
 @media(max-width:760px){main{padding:0 12px 20px}.rail{display:none}.account{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(6,minmax(0,1fr))}.desk h1{font-size:29px}.desk span{font-size:10px}.balance{padding:14px 16px;display:grid;grid-template-columns:1fr auto}.balance small,.balance .hero,#overall{grid-column:1}.balance .primary{grid-column:2;grid-row:1/4;align-self:center;width:auto;margin:0}.chartpanel{padding:12px}}
+ 
+.range-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;border-block:1px solid var(--line);margin:7px 0;padding:11px 0}
+.range-stats>div{padding-left:12px;border-left:2px solid #434348}.range-stats>div:last-child{border-color:var(--accent)}
+.range-stats small{display:block;font-size:11px}.range-stats b{font:550 clamp(12px,1.3vw,18px)/1.5 ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.range-stats+.quote{border:0}.allocation{grid-column:1/-1;width:100%;margin-top:12px}.allocation small{display:flex;justify-content:space-between;color:var(--muted)}.allocation-track{height:5px;border-radius:9px;background:#55545f;margin-top:5px;overflow:hidden}.allocation-track i{height:100%;display:block;background:var(--accent)}
+@media(max-width:440px){.range-stats>div{padding-left:5px}.range-stats{gap:4px}}
 </style></head><body><div class="rail" aria-label="Workspace shortcuts" role="navigation">
 <a href="#overview" aria-label="Portfolio overview" title="Portfolio overview">▦</a>
 <a href="#panel" aria-label="Chart" title="Chart">⌁</a>
 <button data-tab="hold" aria-label="Open positions" title="Positions">▤</button>
 <button data-tab="trades" aria-label="Trade history" title="Trade history">↺</button>
 <button data-tab="sig" aria-label="AI signals" title="AI signals">≋</button></div><main id="overview"><header><div class="brand"><span class="mark" aria-hidden="true">N<span>50</span></span><strong>Nifty 50</strong><span class="separator">/</span><span class="terminalname">Automated AI Trading</span></div><div class="tools"><small id="markettime"></small><button id="settings">Customize</button></div></header>
-<div class="desk"><h1>Portfolio overview</h1><span>Simulated account</span></div><section class="account" aria-label="Account overview"><div class="balance"><small>Portfolio value</small><div class="hero" id="equity">—</div><div id="overall">Overall P&amp;L · —</div><button class="primary" id="open" aria-haspopup="dialog">↓ Download</button></div><div class="metrics"><div title="Based on dated closing statement records"><small>Today’s P&amp;L</small><strong id="daily">—</strong></div><div><small>Available cash</small><strong id="cash">—</strong></div><div><small>Position value</small><strong id="invested">—</strong></div><div><small>Realized P&amp;L</small><strong id="realized">—</strong></div><div><small>Open P&amp;L</small><strong id="openpnl">—</strong></div></div></section>
+<div class="desk"><h1>Portfolio overview</h1><span>Simulated account</span></div><section class="account" aria-label="Account overview"><div class="balance"><small>Portfolio value</small><div class="hero" id="equity">—</div><div id="overall">Overall P&amp;L · —</div><button class="primary" id="open" aria-haspopup="dialog">↓ Download</button><div class="allocation" id="allocation" hidden><small><span>Capital invested</span><span id="investedPct"></span></small><div class="allocation-track"><i id="deployedBar"></i></div></div></div><div class="metrics"><div title="Based on dated closing statement records"><small>Today’s P&amp;L</small><strong id="daily">—</strong></div><div><small>Available cash</small><strong id="cash">—</strong></div><div><small>Position value</small><strong id="invested">—</strong></div><div><small>Realized P&amp;L</small><strong id="realized">—</strong></div><div><small>Open P&amp;L</small><strong id="openpnl">—</strong></div></div></section>
 <div class="workspace"><aside id="aside"><div class="watchtitle"><h2>Watchlist</h2><button id="collapse" class="minor">Hide</button></div><div id="watch"></div></aside>
 <section class="chartpanel" id="panel"><div class="row"><div><select id="pick" aria-label="Select instrument" hidden></select><h1 id="symbol">RELIANCE</h1><div class="price" id="chartprice">—</div></div><div class="tools"><div id="equityRange" aria-label="Equity chart range"><button data-range="hour">1H</button><button data-range="session">Session</button><button data-range="recent">Recent</button></div><div id="frames" aria-label="Timeframe"><button data-min="1">1m</button><button data-min="5">5m</button><button data-min="15">15m</button></div><button id="full" aria-label="Expand chart">Expand</button><button id="connect">Connect Google</button></div></div>
-<p id="chartcaption" class="muted" role="status"></p><canvas id="plot" tabindex="0" role="img" aria-label="Price chart"></canvas><div id="readout" class="quote">—</div></section></div>
+<p id="chartcaption" class="muted" role="status"></p><canvas id="plot" tabindex="0" role="img" aria-label="Price chart"></canvas><div id="rangeStats" class="range-stats" aria-label="Portfolio range summary">
+<div><small>First observed</small><b id="firstEquity">—</b></div>
+<div><small>Last observed</small><b id="lastEquity">—</b></div>
+<div><small>Range change</small><b id="rangeMove">—</b></div></div><div id="readout" class="quote">—</div></section></div>
 <section class="data" id="activity"><nav aria-label="Account activity"><button id="hold">Positions</button><button id="trades">Trade history</button><button id="sig">AI signals</button></nav><div class="scroll"><table><thead id="head"></thead><tbody id="rows"></tbody></table></div></section><footer id="stamp">Reading account… · Simulated account</footer></main>
 <dialog id="prefs" aria-labelledby="prefsTitle"><div class="row"><h2 id="prefsTitle">Customize terminal</h2><button id="done">Done</button></div><div class="pair">
 <label>Accent<select id="accent"><option value="mint">Mint</option><option value="lilac">Lilac</option><option value="cyan">Ice cyan</option><option value="blue">Steel blue</option><option value="silver">Silver</option></select></label>
@@ -151,6 +160,9 @@ function render(){
  const d=snapshot, p=Object.values(d.positions||{}), sum=p.reduce((a,v)=>a+Number(v.unrealized_pnl||0),0);
  for(const [id,n] of [['equity',d.balance],['cash',d.cash],['invested',d.cash!=null&&d.balance!=null?d.balance-d.cash:null],['realized',d.realized_pnl],['openpnl',d.balance!=null?sum:null]]){
  $(id).textContent=money(n);if(['realized','openpnl'].includes(id))$(id).className=tint(n);}
+ const allocation=d.balance>0&&d.cash!=null&&Number.isFinite(+d.cash)?100*(d.balance-d.cash)/d.balance:NaN;
+ $('allocation').hidden=!Number.isFinite(allocation)||allocation<0||allocation>100;
+ if(!$('allocation').hidden){$('investedPct').textContent=allocation.toFixed(1)+'%';$('deployedBar').style.width=allocation+'%';}
  $('overall').textContent='Overall P&L · '+money(d.pnl);$('overall').className=tint(d.pnl);
  $('hold').textContent='Positions'+(hasRead?' ('+p.length+')':'');
  for(const k of ['hold','trades','sig'])$(k).setAttribute('aria-pressed',String(k===mode));
@@ -324,13 +336,20 @@ function draw(){
  $('equityRange').hidden=!!selected;
  for(const button of $('equityRange').children)button.setAttribute('aria-pressed',String(button.dataset.range===range));
  trace=selected?(stock?bars:observedPrices.get(selected)||[]):equitySeries(savedEquity,samples,range);
+ const sparse=!selected&&trace.some((p,i)=>i>0&&p.t-trace[i-1].t>15*60000);
+ $('rangeStats').hidden=!!selected||!trace.length;
+ if(!$('rangeStats').hidden){
+  const first=trace[0].v,last=trace.at(-1).v,delta=trace.length>1?last-first:null;
+  $('firstEquity').textContent=money(first);$('lastEquity').textContent=money(last);
+  $('rangeMove').textContent=(delta>0?'+':'')+money(delta);$('rangeMove').className=tint(delta);
+ }
  const canvas=$('plot'),w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;
  const ratio=window.devicePixelRatio||1;canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio);
  const g=canvas.getContext('2d');g.scale(ratio,ratio);
  const left=8,right=w-76,top=12,bottom=h-24;
  const description=stock?'Recorded candles · '+minutes+' min':selected?'Observed quote prices':'Recorded equity · '+trace.length+' observations'+(trace.length===1?' · Waiting for a second observation':!authorized()?' · Connect Google for statement history':'');
  const timestamp=snapshot.signals?.[selected]?.time;
- $('chartcaption').textContent=authMessage||cache.error||(description+(timestamp?' · Signal quote '+timestamp+' IST':'')+(cache.busy?' · Syncing archive…':''));
+ $('chartcaption').textContent=authMessage||cache.error||(description+(sparse?' · Dashed spans connect observations more than 15 minutes apart.':'')+(timestamp?' · Signal quote '+timestamp+' IST':'')+(cache.busy?' · Syncing archive…':''));
  if(!trace.length){$('readout').textContent='—';g.fillStyle='#b1bfcd';g.font='14px system-ui';g.fillText('Waiting for recorded data…',left+6,h/2);return;}
  let lo=Infinity,hi=-Infinity;
  for(const r of trace){lo=Math.min(lo,stock?r.l:r.v);hi=Math.max(hi,stock?r.h:r.v);}
@@ -343,10 +362,17 @@ function draw(){
  if(stock){const body=Math.max(1,Math.min(11,(right-left)/trace.length*.65));trace.forEach((r,i)=>{g.fillStyle=g.strokeStyle=r.c>=r.o?'#6ed2ab':'#f3918f';g.beginPath();g.moveTo(x(i),y(r.h));g.lineTo(x(i),y(r.l));g.stroke();g.fillRect(x(i)-body/2,Math.min(y(r.o),y(r.c)),body,Math.max(1,Math.abs(y(r.o)-y(r.c))));});}
  else if(!selected){
   g.strokeStyle=g.fillStyle=colors[prefs.accent]||colors.cyan;g.lineWidth=2;g.beginPath();
-  trace.forEach((r,i)=>{
-   if(!i || r.t-trace[i-1].t>15*60000)g.moveTo(x(i),y(r.v));
-   else g.lineTo(x(i),y(r.v));
-  });g.stroke();
+  let dashed=false;
+  g.moveTo(x(0),y(trace[0].v));
+  for(let i=1;i<trace.length;i++){
+   const previous=trace[i-1],point=trace[i],gap=point.t-previous.t>15*60000;
+   if(gap!==dashed){
+    g.stroke();g.beginPath();g.setLineDash(gap?[5,5]:[]);
+    g.moveTo(x(i-1),y(previous.v));dashed=gap;
+   }
+   g.lineTo(x(i),y(point.v));
+  }
+  g.stroke();g.setLineDash([]);
   trace.forEach((r,i)=>{
    if(trace.length<80||i===trace.length-1||!i||r.t-trace[i-1].t>15*60000||trace[i+1].t-r.t>15*60000){
     g.beginPath();g.arc(x(i),y(r.v),trace.length===1?4:2,0,Math.PI*2);g.fill();
