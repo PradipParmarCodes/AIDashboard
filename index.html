@@ -1,107 +1,644 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nifty 50 · Paper portfolio</title>
-<script async defer src="https://accounts.google.com/gsi/client"></script>
-<style>
-:root{--ink:#202923;--muted:#59665d;--line:#d7dfd6;--green:#14614c;--red:#a53730;font:15px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#f5f6f2}*{box-sizing:border-box}body{margin:0}main{max-width:1040px;padding:0 24px 42px;margin:auto}header,.row,nav,.fields,.actions{display:flex;align-items:center;justify-content:space-between;gap:16px}header{padding:21px 0;border-bottom:1px solid var(--line)}header strong{letter-spacing:-.03em;font-size:20px}small,label,.muted,th{color:var(--muted)}button,input,select{font:inherit}button,a.btn{cursor:pointer;text-decoration:none;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink);padding:8px 15px}button.primary,a.btn{background:#204f3d;color:white;border-color:#204f3d;font-weight:600}button:disabled{opacity:.5;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #e4a646;outline-offset:2px}.overview{padding:38px 0 24px}.hero{font-weight:650;font-size:clamp(38px,7vw,64px);letter-spacing:-.065em;line-height:1.2;font-variant-numeric:tabular-nums}.amount{font-variant-numeric:tabular-nums}.metrics{display:grid;grid-template-columns:repeat(4,1fr);border-block:1px solid var(--line);padding:18px 0;gap:12px}.metrics strong{display:block;font-size:20px}.gain{color:var(--green)}.loss{color:var(--red)}section.data{background:white;border:1px solid var(--line);border-radius:12px;margin-top:26px;overflow:hidden}nav{justify-content:flex-start;padding:12px 16px;border-bottom:1px solid var(--line)}nav button{border:0;background:transparent}nav button[aria-pressed=true]{background:#e6eee8;color:#174d36;font-weight:650}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;font-variant-numeric:tabular-nums}td,th{text-align:right;padding:12px 16px;border-bottom:1px solid #edf0eb}td:first-child,th:first-child{text-align:left}th{font-size:12px;font-weight:550}footer{margin-top:14px;font-size:12px;color:var(--muted)}dialog{width:min(460px,94vw);border:1px solid var(--line);padding:22px;border-radius:14px;color:var(--ink)}dialog::backdrop{background:#14201770}h2{margin:0;font-size:20px}label{display:grid;gap:5px;margin-top:12px}select,input{padding:9px 8px;border:1px solid var(--line);border-radius:6px;min-width:0;background:white;color:var(--ink)}.fields{align-items:end;flex-wrap:wrap}.fields label{flex:1}.actions{justify-content:end;margin-top:20px}.status{font-size:13px;color:var(--muted)}[hidden]{display:none!important}@media(max-width:640px){main{padding:0 14px 25px}.metrics{grid-template-columns:1fr 1fr}.overview{padding-top:24px}td,th{padding:10px}.metrics strong{font-size:17px}}
-</style></head><body><main><header><strong>Nifty 50 <span class="muted">/ Paper portfolio</span></strong><button class="primary" id="open" aria-haspopup="dialog">Download</button></header>
-<section class="overview"><span class="muted">Portfolio value</span><div class="hero" id="equity">—</div><div id="overall">Overall P&amp;L · —</div></section>
-<div class="metrics"><div><small>Available cash</small><strong id="cash">—</strong></div><div><small>Position value</small><strong id="invested">—</strong></div><div><small>Realized P&amp;L</small><strong id="realized">—</strong></div><div><small>Open P&amp;L</small><strong id="openpnl">—</strong></div></div>
-<section class="data"><nav aria-label="Portfolio view"><button id="hold" aria-pressed="true">Positions</button><button id="sig" aria-pressed="false">AI signals</button></nav><div class="scroll"><table><thead id="head"></thead><tbody id="rows"></tbody></table></div></section><footer id="stamp">Reading portfolio…</footer></main>
-<dialog id="dlg" aria-labelledby="title"><div class="row"><h2 id="title">Download CSV</h2><button id="close" aria-label="Close download dialog">Close</button></div>
-<label>Data<select id="kind"><option value="statement">Trade statement</option><option value="candles">1-second candles</option></select></label>
-<label>Period<select id="period"><option value="all">All history</option><option value="today">Today (IST)</option><option value="custom">Custom range (IST)</option></select></label>
-<div class="fields" id="range" hidden><label>From<input type="datetime-local" id="from" step="1"></label><label>Through<input type="datetime-local" id="to" step="1"></label></div>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Nifty 50 · Paper portfolio</title>
+    <script async defer src="https://accounts.google.com/gsi/client"></script>
+    <style>
+      :root {
+        --ink: #202923;
+        --muted: #59665d;
+        --line: #d7dfd6;
+        --green: #14614c;
+        --red: #a53730;
+        font:
+          15px/1.5 Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        color: var(--ink);
+        background: #f5f6f2;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+      }
+      main {
+        max-width: 1040px;
+        padding: 0 24px 42px;
+        margin: auto;
+      }
+      header,
+      .row,
+      nav,
+      .fields,
+      .actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      header {
+        padding: 21px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      header strong {
+        letter-spacing: -0.03em;
+        font-size: 20px;
+      }
+      small,
+      label,
+      .muted,
+      th {
+        color: var(--muted);
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button,
+      a.btn {
+        cursor: pointer;
+        text-decoration: none;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        color: var(--ink);
+        padding: 8px 15px;
+      }
+      button.primary,
+      a.btn {
+        background: #204f3d;
+        color: white;
+        border-color: #204f3d;
+        font-weight: 600;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      a:focus-visible {
+        outline: 3px solid #e4a646;
+        outline-offset: 2px;
+      }
+      .overview {
+        padding: 38px 0 24px;
+      }
+      .hero {
+        font-weight: 650;
+        font-size: clamp(38px, 7vw, 64px);
+        letter-spacing: -0.065em;
+        line-height: 1.2;
+        font-variant-numeric: tabular-nums;
+      }
+      .amount {
+        font-variant-numeric: tabular-nums;
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        border-block: 1px solid var(--line);
+        padding: 18px 0;
+        gap: 12px;
+      }
+      .metrics strong {
+        display: block;
+        font-size: 20px;
+      }
+      .gain {
+        color: var(--green);
+      }
+      .loss {
+        color: var(--red);
+      }
+      section.data {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        margin-top: 26px;
+        overflow: hidden;
+      }
+      nav {
+        justify-content: flex-start;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      nav button {
+        border: 0;
+        background: transparent;
+      }
+      nav button[aria-pressed="true"] {
+        background: #e6eee8;
+        color: #174d36;
+        font-weight: 650;
+      }
+      .scroll {
+        overflow: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+      td,
+      th {
+        text-align: right;
+        padding: 12px 16px;
+        border-bottom: 1px solid #edf0eb;
+      }
+      td:first-child,
+      th:first-child {
+        text-align: left;
+      }
+      th {
+        font-size: 12px;
+        font-weight: 550;
+      }
+      footer {
+        margin-top: 14px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      dialog {
+        width: min(460px, 94vw);
+        border: 1px solid var(--line);
+        padding: 22px;
+        border-radius: 14px;
+        color: var(--ink);
+      }
+      dialog::backdrop {
+        background: #14201770;
+      }
+      h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+      label {
+        display: grid;
+        gap: 5px;
+        margin-top: 12px;
+      }
+      select,
+      input {
+        padding: 9px 8px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        min-width: 0;
+        background: white;
+        color: var(--ink);
+      }
+      .fields {
+        align-items: end;
+        flex-wrap: wrap;
+      }
+      .fields label {
+        flex: 1;
+      }
+      .actions {
+        justify-content: end;
+        margin-top: 20px;
+      }
+      .status {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      [hidden] {
+        display: none !important;
+      }
+      @media (max-width: 640px) {
+        main {
+          padding: 0 14px 25px;
+        }
+        .metrics {
+          grid-template-columns: 1fr 1fr;
+        }
+        .overview {
+          padding-top: 24px;
+        }
+        td,
+        th {
+          padding: 10px;
+        }
+        .metrics strong {
+          font-size: 17px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <strong>Nifty 50 <span class="muted">/ Paper portfolio</span></strong
+        ><button class="primary" id="open" aria-haspopup="dialog">
+          Download
+        </button>
+      </header>
+      <section class="overview">
+        <span class="muted">Portfolio value</span>
+        <div class="hero" id="equity">—</div>
+        <div id="overall">Overall P&amp;L · —</div>
+      </section>
+      <div class="metrics">
+        <div><small>Available cash</small><strong id="cash">—</strong></div>
+        <div><small>Position value</small><strong id="invested">—</strong></div>
+        <div>
+          <small>Realized P&amp;L</small><strong id="realized">—</strong>
+        </div>
+        <div><small>Open P&amp;L</small><strong id="openpnl">—</strong></div>
+      </div>
+      <section class="data">
+        <nav aria-label="Portfolio view">
+          <button id="hold" aria-pressed="true">Positions</button
+          ><button id="sig" aria-pressed="false">AI signals</button>
+        </nav>
+        <div class="scroll">
+          <table>
+            <thead id="head"></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+      <footer id="stamp">Reading portfolio…</footer>
+    </main>
+    <dialog id="dlg" aria-labelledby="title">
+      <div class="row">
+        <h2 id="title">Download CSV</h2>
+        <button id="close" aria-label="Close download dialog">Close</button>
+      </div>
+      <label
+        >Data<select id="kind">
+          <option value="statement">Trade statement</option>
+          <option value="candles">1-second candles</option>
+        </select></label
+      >
+      <label
+        >Period<select id="period">
+          <option value="all">All history</option>
+          <option value="today">Today (IST)</option>
+          <option value="custom">Custom range (IST)</option>
+        </select></label
+      >
+      <div class="fields" id="range" hidden>
+        <label>From<input type="datetime-local" id="from" step="1" /></label
+        ><label>Through<input type="datetime-local" id="to" step="1" /></label>
+      </div>
 
-<p class="status" id="msg" role="status"></p><div class="actions"><a class="btn" id="ready" target="_blank" rel="noopener" hidden>Save CSV</a><button id="save" class="primary">Download CSV</button></div></dialog>
-<script>
-'use strict';
-const $=id=>document.getElementById(id);
-// Paste your public Google OAuth Web application client ID here.
-const GOOGLE_CLIENT_ID = 'PASTE_YOUR_WEB_CLIENT_ID_HERE';
-const FOLDER_ID = '1Rvkweq4G6JKMfoupF6LWnzqzt-mMlrnQ';
-let token='', expiresAt=0;
-function authorize(){
- if(token && Date.now()<expiresAt)return Promise.resolve();
- if(!GOOGLE_CLIENT_ID.endsWith('.apps.googleusercontent.com'))throw Error('Set GOOGLE_CLIENT_ID in index.html first.');
- if(location.protocol==='file:')throw Error('Open the hosted dashboard to authorize Google Drive.');
- if(!window.google?.accounts?.oauth2)throw Error('Google sign-in did not load. Reload and try again.');
- return new Promise((resolve,reject)=>{
-  google.accounts.oauth2.initTokenClient({client_id:GOOGLE_CLIENT_ID,
-   scope:'https://www.googleapis.com/auth/drive.readonly',
-   callback:r=>{if(!r.access_token){reject(Error('Google Drive authorization was declined.'));return;}
-    token=r.access_token;expiresAt=Date.now()+1000*(Number(r.expires_in)-60);resolve();},
-   error_callback:()=>reject(Error('Google sign-in closed or was blocked. Try Download CSV again.'))
-  }).requestAccessToken({prompt:''});
- });
-}
-async function drive(path,params,headers={}){
- const url='https://www.googleapis.com/drive/v3/files'+path+'?'+new URLSearchParams(params);
- const res=await fetch(url,{headers:{Authorization:'Bearer '+token,...headers},cache:'no-store'});
- if(res.status===401){token='';throw Error('Session expired. Click Download CSV again.');}
- if(!res.ok){const body=await res.json().catch(()=>({}));throw Error(body.error?.message||'Drive request failed ('+res.status+').');}
- return res;
-}
-async function archiveInfo(name){
- const params={q:"'"+FOLDER_ID+"' in parents and trashed=false and name='"+name+"'",
- fields:'nextPageToken,files(id,size)',includeItemsFromAllDrives:true,supportsAllDrives:true};
- const files=[];do{const page=await(await drive('',params)).json();files.push(...(page.files||[]));params.pageToken=page.nextPageToken;}while(params.pageToken);
- if(files.length!==1)throw Error(files.length?'Duplicate archive names in Drive.':'Archive missing. Check your Google account and the Kaggle upload.');
- return {id:files[0].id,size:Number(files[0].size)};
-}
-const fmt=new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'});
-const money=n=>n==null||!Number.isFinite(Number(n))?'—':fmt.format(n);
-const tint=n=>n>0?'gain':n<0?'loss':'';
-let snapshot={}, mode='hold', hasRead=false;
-function cells(parent,values,tag){const tr=document.createElement('tr');values.forEach(v=>{const c=document.createElement(tag);c.textContent=v;tr.append(c)});parent.append(tr);return tr;}
-function render(){
- const d=snapshot, p=Object.values(d.positions||{}), sum=p.reduce((a,v)=>a+Number(v.unrealized_pnl||0),0);
- for(const [id,n] of [['equity',d.balance],['cash',d.cash],['invested',d.cash!=null&&d.balance!=null?d.balance-d.cash:null],['realized',d.realized_pnl],['openpnl',d.balance!=null?sum:null]]){
- $(id).textContent=money(n);if(['realized','openpnl'].includes(id))$(id).className=tint(n);}
- $('overall').textContent='Overall P&L · '+money(d.pnl);$('overall').className=tint(d.pnl);
- $('hold').textContent='Positions'+(hasRead?' ('+p.length+')':'');
- for(const k of ['hold','sig'])$(k).setAttribute('aria-pressed',String(k===mode));
- const holdings=mode==='hold';$('rows').replaceChildren();$('head').replaceChildren();
- const h=holdings?['Symbol','Qty','Entry','Open P&L']:['Symbol','Last price','Action','Model score','Time (IST)'];cells($('head'),h,'th');
- if(holdings){for(const v of p){const tr=cells($('rows'),[v.symbol,v.qty,money(v.entry_price),money(v.unrealized_pnl)],'td');tr.lastChild.className=tint(v.unrealized_pnl);}}
- else{for(const [sym,v] of Object.entries(d.signals||{}).sort(([a],[b])=>a.localeCompare(b)))cells($('rows'),[sym,money(v.price),v.action,Number(v.confidence).toFixed(1)+'%',v.time],'td');}
- if(!$('rows').children.length){const tr=cells($('rows'),[hasRead?(holdings?'No open positions.':'No signals recorded.'):'Waiting for portfolio…'],'td');tr.firstChild.colSpan=h.length;}
-}
-for(const k of ['hold','sig'])$(k).onclick=()=>{mode=k;render()};
-async function poll(){try{const r=await fetch('https://niftybot-73b5f-default-rtdb.firebaseio.com/live_data.json',{cache:'no-store',signal:AbortSignal.timeout(8000)});if(!r.ok)throw Error('HTTP '+r.status);
- snapshot=await r.json()||{};hasRead=true;render();$('stamp').textContent='Snapshot read at '+new Date().toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata'})+' IST';}catch(e){$('stamp').textContent='Portfolio unavailable · '+e.message;}finally{setTimeout(poll,5000)}}
-function istDay(){return new Date(Date.now()+19800000).toISOString().slice(0,10);}
-function bounds(period,from,to){if(period==='all')return null;const d=istDay();
- if(period==='today')return [d+'T00:00:00',d+'T23:59:59'];
- if(!from||!to)throw Error('Enter both dates and times.');const normal=v=>v.length===16?v+':00':v;
- const pair=[normal(from),normal(to)];if(pair[0]>pair[1])throw Error('End time must be after the start.');return pair;}
-let objectURL='',run=0;
-function clearReady(){if(objectURL)URL.revokeObjectURL(objectURL);objectURL='';$('ready').hidden=true;$('msg').textContent='';}
-$('open').onclick=()=>{$('dlg').showModal();};
-$('close').onclick=()=>$('dlg').close();
-$('dlg').onclose=()=>{run++;lock(false);clearReady();};
-function lock(b){for(const id of ['save','kind','period','from','to'])$(id).disabled=b;}
-for(const id of ['kind','period','from','to'])$(id).onchange=()=>{clearReady();$('range').hidden=$('period').value!=='custom';};
-function output(url,name){const a=$('ready');a.href=url;a.download=name;a.hidden=false;a.click();$('msg').textContent='If the download did not start, choose Save CSV.';}
-async function exportCsv(){clearReady();const seq=++run;lock(true);
- try{const kind=$('kind').value,base=kind+'_all.csv',span=bounds($('period').value,$('from').value,$('to').value);
- await authorize();if(seq!==run)return;
- const info=await archiveInfo(base);if(seq!==run)return;if(!info.size)throw Error('Archive is empty.');
- const mediaPath='/'+encodeURIComponent(info.id), params={alt:'media',supportsAllDrives:true};
- if(!span){const blob=await(await drive(mediaPath,params)).blob();if(seq!==run)return;
- objectURL=URL.createObjectURL(blob);output(objectURL,base);return;}
- let offset=0, tail='',header='',count=0;const chunks=[],decoder=new TextDecoder();
- function consume(line){line=line.replace(/\r$/,'');if(!line)return;if(!header){header=line;chunks.push(line+'\r\n');return;}
- const sec=line.slice(0,19);if(sec>=span[0]&&sec<=span[1]){chunks.push(line+'\r\n');count++;}}
- while(offset<info.size){let bytes;
- const end=Math.min(offset+4194304,info.size)-1;
- const response=await drive(mediaPath,params,{Range:'bytes='+offset+'-'+end});
- if(response.status!==206 && !(offset===0 && end===info.size-1))throw Error('Drive could not read the requested range.');
- bytes=new Uint8Array(await response.arrayBuffer());
- if(bytes.length!==end-offset+1)throw Error('Archive changed during download. Try again.');
- offset=end+1;
- if(seq!==run)return;
- const lines=(tail+decoder.decode(bytes,{stream:true})).split('\n');tail=lines.pop();lines.forEach(consume);$('msg').textContent='Reading archive · '+Math.round(offset/info.size*100)+'%';}
- consume(tail+decoder.decode());if(!count)throw Error('No records in this time range.');
- objectURL=URL.createObjectURL(new Blob(chunks,{type:'text/csv;charset=utf-8'}));output(objectURL,kind+'_'+span.join('_').replace(/:/g,'-')+'.csv');
- }catch(e){if(seq===run)$('msg').textContent=e.message||String(e);}finally{if(seq===run)lock(false);}}
-$('save').onclick=exportCsv;render();poll();
-</script></body></html>
+      <p class="status" id="msg" role="status"></p>
+      <div class="actions">
+        <a class="btn" id="ready" target="_blank" rel="noopener" hidden
+          >Save CSV</a
+        ><button id="save" class="primary">Download CSV</button>
+      </div>
+    </dialog>
+    <script>
+      "use strict";
+      const $ = (id) => document.getElementById(id);
+      // Paste your public Google OAuth Web application client ID here.
+      const GOOGLE_CLIENT_ID =
+        "686897351264-e1e91pbmah1nsl48ooenao2uchatl5br.apps.googleusercontent.com";
+      const FOLDER_ID = "1Rvkweq4G6JKMfoupF6LWnzqzt-mMlrnQ";
+      let token = "",
+        expiresAt = 0;
+      function authorize() {
+        if (token && Date.now() < expiresAt) return Promise.resolve();
+        if (!GOOGLE_CLIENT_ID.endsWith(".apps.googleusercontent.com"))
+          throw Error("Set GOOGLE_CLIENT_ID in index.html first.");
+        if (location.protocol === "file:")
+          throw Error("Open the hosted dashboard to authorize Google Drive.");
+        if (!window.google?.accounts?.oauth2)
+          throw Error("Google sign-in did not load. Reload and try again.");
+        return new Promise((resolve, reject) => {
+          google.accounts.oauth2
+            .initTokenClient({
+              client_id: GOOGLE_CLIENT_ID,
+              scope: "https://www.googleapis.com/auth/drive.readonly",
+              callback: (r) => {
+                if (!r.access_token) {
+                  reject(Error("Google Drive authorization was declined."));
+                  return;
+                }
+                token = r.access_token;
+                expiresAt = Date.now() + 1000 * (Number(r.expires_in) - 60);
+                resolve();
+              },
+              error_callback: () =>
+                reject(
+                  Error(
+                    "Google sign-in closed or was blocked. Try Download CSV again.",
+                  ),
+                ),
+            })
+            .requestAccessToken({ prompt: "" });
+        });
+      }
+      async function drive(path, params, headers = {}) {
+        const url =
+          "https://www.googleapis.com/drive/v3/files" +
+          path +
+          "?" +
+          new URLSearchParams(params);
+        const res = await fetch(url, {
+          headers: { Authorization: "Bearer " + token, ...headers },
+          cache: "no-store",
+        });
+        if (res.status === 401) {
+          token = "";
+          throw Error("Session expired. Click Download CSV again.");
+        }
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw Error(
+            body.error?.message || "Drive request failed (" + res.status + ").",
+          );
+        }
+        return res;
+      }
+      async function archiveInfo(name) {
+        const params = {
+          q:
+            "'" +
+            FOLDER_ID +
+            "' in parents and trashed=false and name='" +
+            name +
+            "'",
+          fields: "nextPageToken,files(id,size)",
+          includeItemsFromAllDrives: true,
+          supportsAllDrives: true,
+        };
+        const files = [];
+        do {
+          const page = await (await drive("", params)).json();
+          files.push(...(page.files || []));
+          params.pageToken = page.nextPageToken;
+        } while (params.pageToken);
+        if (files.length !== 1)
+          throw Error(
+            files.length
+              ? "Duplicate archive names in Drive."
+              : "Archive missing. Check your Google account and the Kaggle upload.",
+          );
+        return { id: files[0].id, size: Number(files[0].size) };
+      }
+      const fmt = new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+      });
+      const money = (n) =>
+        n == null || !Number.isFinite(Number(n)) ? "—" : fmt.format(n);
+      const tint = (n) => (n > 0 ? "gain" : n < 0 ? "loss" : "");
+      let snapshot = {},
+        mode = "hold",
+        hasRead = false;
+      function cells(parent, values, tag) {
+        const tr = document.createElement("tr");
+        values.forEach((v) => {
+          const c = document.createElement(tag);
+          c.textContent = v;
+          tr.append(c);
+        });
+        parent.append(tr);
+        return tr;
+      }
+      function render() {
+        const d = snapshot,
+          p = Object.values(d.positions || {}),
+          sum = p.reduce((a, v) => a + Number(v.unrealized_pnl || 0), 0);
+        for (const [id, n] of [
+          ["equity", d.balance],
+          ["cash", d.cash],
+          [
+            "invested",
+            d.cash != null && d.balance != null ? d.balance - d.cash : null,
+          ],
+          ["realized", d.realized_pnl],
+          ["openpnl", d.balance != null ? sum : null],
+        ]) {
+          $(id).textContent = money(n);
+          if (["realized", "openpnl"].includes(id)) $(id).className = tint(n);
+        }
+        $("overall").textContent = "Overall P&L · " + money(d.pnl);
+        $("overall").className = tint(d.pnl);
+        $("hold").textContent =
+          "Positions" + (hasRead ? " (" + p.length + ")" : "");
+        for (const k of ["hold", "sig"])
+          $(k).setAttribute("aria-pressed", String(k === mode));
+        const holdings = mode === "hold";
+        $("rows").replaceChildren();
+        $("head").replaceChildren();
+        const h = holdings
+          ? ["Symbol", "Qty", "Entry", "Open P&L"]
+          : ["Symbol", "Last price", "Action", "Model score", "Time (IST)"];
+        cells($("head"), h, "th");
+        if (holdings) {
+          for (const v of p) {
+            const tr = cells(
+              $("rows"),
+              [v.symbol, v.qty, money(v.entry_price), money(v.unrealized_pnl)],
+              "td",
+            );
+            tr.lastChild.className = tint(v.unrealized_pnl);
+          }
+        } else {
+          for (const [sym, v] of Object.entries(d.signals || {}).sort(
+            ([a], [b]) => a.localeCompare(b),
+          ))
+            cells(
+              $("rows"),
+              [
+                sym,
+                money(v.price),
+                v.action,
+                Number(v.confidence).toFixed(1) + "%",
+                v.time,
+              ],
+              "td",
+            );
+        }
+        if (!$("rows").children.length) {
+          const tr = cells(
+            $("rows"),
+            [
+              hasRead
+                ? holdings
+                  ? "No open positions."
+                  : "No signals recorded."
+                : "Waiting for portfolio…",
+            ],
+            "td",
+          );
+          tr.firstChild.colSpan = h.length;
+        }
+      }
+      for (const k of ["hold", "sig"])
+        $(k).onclick = () => {
+          mode = k;
+          render();
+        };
+      async function poll() {
+        try {
+          const r = await fetch(
+            "https://niftybot-73b5f-default-rtdb.firebaseio.com/live_data.json",
+            { cache: "no-store", signal: AbortSignal.timeout(8000) },
+          );
+          if (!r.ok) throw Error("HTTP " + r.status);
+          snapshot = (await r.json()) || {};
+          hasRead = true;
+          render();
+          $("stamp").textContent =
+            "Snapshot read at " +
+            new Date().toLocaleTimeString("en-IN", {
+              timeZone: "Asia/Kolkata",
+            }) +
+            " IST";
+        } catch (e) {
+          $("stamp").textContent = "Portfolio unavailable · " + e.message;
+        } finally {
+          setTimeout(poll, 5000);
+        }
+      }
+      function istDay() {
+        return new Date(Date.now() + 19800000).toISOString().slice(0, 10);
+      }
+      function bounds(period, from, to) {
+        if (period === "all") return null;
+        const d = istDay();
+        if (period === "today") return [d + "T00:00:00", d + "T23:59:59"];
+        if (!from || !to) throw Error("Enter both dates and times.");
+        const normal = (v) => (v.length === 16 ? v + ":00" : v);
+        const pair = [normal(from), normal(to)];
+        if (pair[0] > pair[1]) throw Error("End time must be after the start.");
+        return pair;
+      }
+      let objectURL = "",
+        run = 0;
+      function clearReady() {
+        if (objectURL) URL.revokeObjectURL(objectURL);
+        objectURL = "";
+        $("ready").hidden = true;
+        $("msg").textContent = "";
+      }
+      $("open").onclick = () => {
+        $("dlg").showModal();
+      };
+      $("close").onclick = () => $("dlg").close();
+      $("dlg").onclose = () => {
+        run++;
+        lock(false);
+        clearReady();
+      };
+      function lock(b) {
+        for (const id of ["save", "kind", "period", "from", "to"])
+          $(id).disabled = b;
+      }
+      for (const id of ["kind", "period", "from", "to"])
+        $(id).onchange = () => {
+          clearReady();
+          $("range").hidden = $("period").value !== "custom";
+        };
+      function output(url, name) {
+        const a = $("ready");
+        a.href = url;
+        a.download = name;
+        a.hidden = false;
+        a.click();
+        $("msg").textContent =
+          "If the download did not start, choose Save CSV.";
+      }
+      async function exportCsv() {
+        clearReady();
+        const seq = ++run;
+        lock(true);
+        try {
+          const kind = $("kind").value,
+            base = kind + "_all.csv",
+            span = bounds($("period").value, $("from").value, $("to").value);
+          await authorize();
+          if (seq !== run) return;
+          const info = await archiveInfo(base);
+          if (seq !== run) return;
+          if (!info.size) throw Error("Archive is empty.");
+          const mediaPath = "/" + encodeURIComponent(info.id),
+            params = { alt: "media", supportsAllDrives: true };
+          if (!span) {
+            const blob = await (await drive(mediaPath, params)).blob();
+            if (seq !== run) return;
+            objectURL = URL.createObjectURL(blob);
+            output(objectURL, base);
+            return;
+          }
+          let offset = 0,
+            tail = "",
+            header = "",
+            count = 0;
+          const chunks = [],
+            decoder = new TextDecoder();
+          function consume(line) {
+            line = line.replace(/\r$/, "");
+            if (!line) return;
+            if (!header) {
+              header = line;
+              chunks.push(line + "\r\n");
+              return;
+            }
+            const sec = line.slice(0, 19);
+            if (sec >= span[0] && sec <= span[1]) {
+              chunks.push(line + "\r\n");
+              count++;
+            }
+          }
+          while (offset < info.size) {
+            let bytes;
+            const end = Math.min(offset + 4194304, info.size) - 1;
+            const response = await drive(mediaPath, params, {
+              Range: "bytes=" + offset + "-" + end,
+            });
+            if (
+              response.status !== 206 &&
+              !(offset === 0 && end === info.size - 1)
+            )
+              throw Error("Drive could not read the requested range.");
+            bytes = new Uint8Array(await response.arrayBuffer());
+            if (bytes.length !== end - offset + 1)
+              throw Error("Archive changed during download. Try again.");
+            offset = end + 1;
+            if (seq !== run) return;
+            const lines = (
+              tail + decoder.decode(bytes, { stream: true })
+            ).split("\n");
+            tail = lines.pop();
+            lines.forEach(consume);
+            $("msg").textContent =
+              "Reading archive · " +
+              Math.round((offset / info.size) * 100) +
+              "%";
+          }
+          consume(tail + decoder.decode());
+          if (!count) throw Error("No records in this time range.");
+          objectURL = URL.createObjectURL(
+            new Blob(chunks, { type: "text/csv;charset=utf-8" }),
+          );
+          output(
+            objectURL,
+            kind + "_" + span.join("_").replace(/:/g, "-") + ".csv",
+          );
+        } catch (e) {
+          if (seq === run) $("msg").textContent = e.message || String(e);
+        } finally {
+          if (seq === run) lock(false);
+        }
+      }
+      $("save").onclick = exportCsv;
+      render();
+      poll();
+    </script>
+  </body>
+</html>
