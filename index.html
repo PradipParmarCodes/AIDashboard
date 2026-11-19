@@ -21,10 +21,18 @@ nav button[aria-pressed=true]{border-color:var(--accent)}button:focus-visible,se
 #prefs .pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}#prefs .check{display:flex;flex-direction:row;gap:8px;align-items:center;color:var(--ink)}.watchtitle{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line)}.watchtitle h2{border:0;padding:0}.minor{font-size:12px;background:transparent;padding:3px 7px}
 @media(max-width:850px){.metrics{grid-template-columns:repeat(3,1fr)}.account{gap:20px}}
 @media(max-width:760px){.workspace{grid-template-columns:1fr}.watchrow{flex:0 0 auto}.watchitem{display:grid;grid-template-columns:auto}.watchitem .spark{display:none}.watchrow{grid-template-columns:auto 20px}.tools{flex-wrap:wrap}.metrics{grid-template-columns:repeat(3,1fr)}header{gap:5px}.hero{font-size:29px}.account{padding:14px 0}.chartpanel canvas{max-height:65vh}.chartpanel.expanded canvas,.chartpanel:fullscreen canvas{max-height:none}}
-</style></head><body><main><header><div class="brand"><span class="mark" aria-hidden="true">▥</span><strong>Nifty 50</strong><span class="separator">/</span><span class="muted">Trading terminal</span></div><div class="tools"><small id="markettime"></small><button id="settings">Customize</button><button class="primary" id="open" aria-haspopup="dialog">↓ Download</button></div></header>
-<section class="account" aria-label="Account overview"><div class="balance"><small>Portfolio value</small><div class="hero" id="equity">—</div><div id="overall">Overall P&amp;L · —</div></div><div class="metrics"><div title="Based on dated closing statement records"><small>Today’s P&amp;L</small><strong id="daily">—</strong></div><div><small>Available cash</small><strong id="cash">—</strong></div><div><small>Position value</small><strong id="invested">—</strong></div><div><small>Realized P&amp;L</small><strong id="realized">—</strong></div><div><small>Open P&amp;L</small><strong id="openpnl">—</strong></div></div></section>
+
+:root{background:#0c1014;--line:#313a42;--muted:#a2aeb9}
+main{max-width:1540px}.brand{gap:10px}.brand .mark{display:inline-flex;align-items:center;justify-content:center;font:bold 17px/1 system-ui;color:#101719;background:var(--accent);border-radius:3px;width:38px;height:30px}.mark span{font-size:11px;align-self:flex-end;margin-bottom:6px}.terminalname{color:#bbc5ce;font-size:13px}
+.desk{display:flex;justify-content:space-between;align-items:center;margin:22px 0 12px}.desk h1{font-weight:540;letter-spacing:-.045em;font-size:clamp(24px,3vw,38px)}.desk span{color:var(--muted);font:12px ui-monospace,monospace}
+.account{padding:0;display:grid;grid-template-columns:minmax(210px,1.2fr) 4fr;gap:0;background:#171d23;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:16px}.balance{background:#202a30;padding:15px 20px;border-left:3px solid var(--accent)}.metrics{align-items:center;gap:0}.metrics>div{padding:6px 12px;border-left:1px solid var(--line)}.metrics strong{font-size:clamp(14px,1.35vw,21px)}.hero{font-size:clamp(26px,2.7vw,42px)}
+.workspace{grid-template-columns:minmax(0,1fr) minmax(220px,23%)}.chartpanel{grid-column:1;grid-row:1;background:#141a20;border-top:1px solid var(--line)}aside{grid-column:2;grid-row:1}.watchtitle{padding:15px}.watchitem{padding:14px}.chartpanel .price{font-size:24px}.quote{padding:8px 0 2px;border-top:1px solid var(--line)}#equityRange{display:flex;background:#0e1419;border-radius:5px;padding:2px}#equityRange button{background:transparent;border:0;padding:4px 9px}#equityRange button[aria-pressed=true]{color:var(--accent);background:#28323a}.primary{background:var(--accent)}.data{margin-top:16px}.tools{flex-wrap:wrap}
+@media(max-width:900px){.account{grid-template-columns:1fr}.metrics{margin:0;padding:8px;grid-template-columns:repeat(auto-fit,minmax(105px,1fr))}}
+@media(max-width:760px){.workspace{display:flex;flex-direction:column}.chartpanel{order:0}aside{order:1}.desk{margin-top:16px}.watchitem{padding:7px}.brand{flex-wrap:wrap;gap:5px}.terminalname{flex-basis:100%;font-size:11px}.desk span{font-size:10px}.balance{padding:10px 14px}.chartpanel .row{gap:8px}.metrics strong{font-size:15px}}
+</style></head><body><main><header><div class="brand"><span class="mark" aria-hidden="true">N<span>50</span></span><strong>Nifty 50</strong><span class="separator">/</span><span class="terminalname">Automated AI Trading</span></div><div class="tools"><small id="markettime"></small><button id="settings">Customize</button><button class="primary" id="open" aria-haspopup="dialog">↓ Download</button></div></header>
+<div class="desk"><h1>Portfolio workspace</h1><span>Simulated account</span></div><section class="account" aria-label="Account overview"><div class="balance"><small>Portfolio value</small><div class="hero" id="equity">—</div><div id="overall">Overall P&amp;L · —</div></div><div class="metrics"><div title="Based on dated closing statement records"><small>Today’s P&amp;L</small><strong id="daily">—</strong></div><div><small>Available cash</small><strong id="cash">—</strong></div><div><small>Position value</small><strong id="invested">—</strong></div><div><small>Realized P&amp;L</small><strong id="realized">—</strong></div><div><small>Open P&amp;L</small><strong id="openpnl">—</strong></div></div></section>
 <div class="workspace"><aside id="aside"><div class="watchtitle"><h2>Watchlist</h2><button id="collapse" class="minor">Hide</button></div><div id="watch"></div></aside>
-<section class="chartpanel" id="panel"><div class="row"><div><select id="pick" aria-label="Select instrument" hidden></select><h1 id="symbol">RELIANCE</h1><div class="price" id="chartprice">—</div></div><div class="tools"><div id="frames" aria-label="Timeframe"><button data-min="1">1m</button><button data-min="5">5m</button><button data-min="15">15m</button></div><button id="full" aria-label="Expand chart">Expand</button><button id="connect">Connect Google</button></div></div>
+<section class="chartpanel" id="panel"><div class="row"><div><select id="pick" aria-label="Select instrument" hidden></select><h1 id="symbol">RELIANCE</h1><div class="price" id="chartprice">—</div></div><div class="tools"><div id="equityRange" aria-label="Equity chart range"><button data-range="hour">1H</button><button data-range="session">Session</button><button data-range="recent">Recent</button></div><div id="frames" aria-label="Timeframe"><button data-min="1">1m</button><button data-min="5">5m</button><button data-min="15">15m</button></div><button id="full" aria-label="Expand chart">Expand</button><button id="connect">Connect Google</button></div></div>
 <p id="chartcaption" class="muted" role="status"></p><canvas id="plot" tabindex="0" role="img" aria-label="Price chart"></canvas><div id="readout" class="quote">—</div></section></div>
 <section class="data" id="activity"><nav aria-label="Account activity"><button id="hold">Positions</button><button id="trades">Trade history</button><button id="sig">AI signals</button></nav><div class="scroll"><table><thead id="head"></thead><tbody id="rows"></tbody></table></div></section><footer id="stamp">Reading account… · Simulated account</footer></main>
 <dialog id="prefs" aria-labelledby="prefsTitle"><div class="row"><h2 id="prefsTitle">Customize terminal</h2><button id="done">Done</button></div><div class="pair">
@@ -81,7 +89,7 @@ async function archiveInfo(name){
 const fmt=new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'});
 const money=n=>n==null||!Number.isFinite(Number(n))?'—':fmt.format(n);
 const tint=n=>n>0?'gain':n<0?'loss':'';
-let snapshot={}, mode='hold', hasRead=false, selected='RELIANCE';
+let snapshot={}, mode='hold', hasRead=false, selected='';
 try{const prior=localStorage.getItem('nifty.chartSymbol');if(['RELIANCE','HDFCBANK','ICICIBANK','INFY','TCS',''].includes(prior))selected=prior;}catch{}
 const symbols=['RELIANCE','HDFCBANK','ICICIBANK','INFY','TCS',''];
 const colors={cyan:'#77d5e1',blue:'#9cb7ea',silver:'#c6cbd3'};
@@ -148,10 +156,26 @@ const clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',hour:'2-dig
 const dateLabel=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short'});
 const samples=[], historyByStock=new Map();
 let savedEquity=[], trace=[], cursor=-1, latestSnapshot='';
+const equityKey='nifty.equity.niftybot73.v1';
+let range='session';
+try{
+ const saved=JSON.parse(localStorage.getItem(equityKey)||'{}');
+ if(Array.isArray(saved.points)){
+  samples.push(...saved.points.filter(p=>Number.isFinite(p?.t)&&Number.isFinite(p.v)).slice(-1800));
+  latestSnapshot=saved.key||'';
+ }
+}catch{}
 function sample(d){
- const key=JSON.stringify([d.balance,d.signals,d.positions]);
- if(d.balance!=null && Number.isFinite(Number(d.balance)) && key!==latestSnapshot){
-  latestSnapshot=key;samples.push({t:Date.now(),v:Number(d.balance)});if(samples.length>1500)samples.shift();
+ // Keep the first and last balance observed in each minute. A dashboard refresh
+ // with an identical feed must not produce an extra historical observation.
+ const key=JSON.stringify([d.balance,d.cash,d.pnl,d.realized_pnl,d.positions,d.signals]);
+ if(d.balance!=null && String(d.balance).trim() && Number.isFinite(+d.balance) && key!==latestSnapshot){
+  const point={t:Date.now(),v:+d.balance};
+  const bucket=Math.floor(point.t/60000);
+  if(samples.length>=2 && Math.floor(samples.at(-2).t/60000)===bucket)samples.pop();
+  samples.push(point);if(samples.length>1800)samples.shift();
+  latestSnapshot=key;
+  try{localStorage.setItem(equityKey,JSON.stringify({key,points:samples}));}catch{}
  }
  for(const [sym,q] of Object.entries(d.signals||{})){
   const key=q.time+' '+q.price;
@@ -230,7 +254,7 @@ function spark(canvas,sym){
 }
 function setupWatch(){
  $('watch').replaceChildren();
- for(const sym of [...symbols].sort((a,b)=>Number(prefs.pins.includes(b))-Number(prefs.pins.includes(a)))){
+ for(const sym of ['',...symbols.filter(Boolean)].sort((a,b)=>Number(prefs.pins.includes(b))-Number(prefs.pins.includes(a)))){
  const row=document.createElement('div');row.className='watchrow';
  const b=document.createElement('button');b.className='watchitem';b.dataset.symbol=sym;
  const title=document.createElement('strong');title.textContent=sym||'Portfolio';const price=document.createElement('span');price.className='watchprice';
@@ -253,17 +277,30 @@ function fillTrades(){
  const note=cache.error||(!authorized()?'Connect Google to see archived trades.':cache.busy?'Reading trade history…':'No buys or sells in the recent statement.');
  cells($('rows'),[note],'td').firstChild.colSpan=headers.length;}
 }
+function equitySeries(events,observations,period){
+ const merged=new Map();
+ for(const p of [...observations,...events])merged.set(p.t,p);
+ const points=[...merged.values()].sort((a,b)=>a.t-b.t);
+ if(!points.length||period==='recent')return points;
+ const end=points.at(-1).t;
+ const start=period==='hour'?end-3600000:Math.floor((end+19800000)/86400000)*86400000-19800000;
+ return points.filter(p=>p.t>=start);
+}
+for(const button of $('equityRange').children)button.onclick=()=>{
+ range=button.dataset.range;cursor=-1;draw();
+};
 function draw(){
  const minutes=Number(minute), bars=selected?candles(historyByStock.get(selected)||[],minutes):[];
  const stock=bars.length>0, cache=archiveCache[selected?'candles':'statement'];
  $('frames').hidden=!selected;for(const b of $('frames').children)b.setAttribute('aria-pressed',String(b.dataset.min===minute));
- const lastEvent=savedEquity.at(-1)?.t??0;
- trace=selected?(stock?bars:observedPrices.get(selected)||[]):[...savedEquity,...samples.filter(r=>r.t>lastEvent)].slice(-200);
+ $('equityRange').hidden=!!selected;
+ for(const button of $('equityRange').children)button.setAttribute('aria-pressed',String(button.dataset.range===range));
+ trace=selected?(stock?bars:observedPrices.get(selected)||[]):equitySeries(savedEquity,samples,range);
  const canvas=$('plot'),w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;
  const ratio=window.devicePixelRatio||1;canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio);
  const g=canvas.getContext('2d');g.scale(ratio,ratio);
  const left=8,right=w-76,top=12,bottom=h-24;
- const description=stock?'Recorded candles · '+minutes+' min':selected?'Observed quote prices':'Portfolio equity';
+ const description=stock?'Recorded candles · '+minutes+' min':selected?'Observed quote prices':'Recorded equity · '+trace.length+' observations'+(trace.length===1?' · Waiting for a second observation':!authorized()?' · Connect Google for statement history':'');
  const timestamp=snapshot.signals?.[selected]?.time;
  $('chartcaption').textContent=authMessage||cache.error||(description+(timestamp?' · Signal quote '+timestamp+' IST':'')+(cache.busy?' · Syncing archive…':''));
  if(!trace.length){$('readout').textContent='—';g.fillStyle='#b1bfcd';g.font='14px system-ui';g.fillText('Waiting for recorded data…',left+6,h/2);return;}
@@ -276,7 +313,18 @@ function draw(){
  g.font='11px system-ui';g.lineWidth=1;
  for(let i=0;i<5;i++){const v=lo+(hi-lo)*i/4,py=y(v);g.strokeStyle='#334253';g.beginPath();g.moveTo(left,py);g.lineTo(right,py);g.stroke();g.fillStyle='#b2c1cf';g.fillText(v.toLocaleString('en-IN',{maximumFractionDigits:2}),right+6,py+4);}
  if(stock){const body=Math.max(1,Math.min(11,(right-left)/trace.length*.65));trace.forEach((r,i)=>{g.fillStyle=g.strokeStyle=r.c>=r.o?'#6ed2ab':'#f3918f';g.beginPath();g.moveTo(x(i),y(r.h));g.lineTo(x(i),y(r.l));g.stroke();g.fillRect(x(i)-body/2,Math.min(y(r.o),y(r.c)),body,Math.max(1,Math.abs(y(r.o)-y(r.c))));});}
- else if(!selected){g.fillStyle=colors[prefs.accent];trace.forEach((r,i)=>{g.beginPath();g.arc(x(i),y(r.v),2.5,0,Math.PI*2);g.fill();});}
+ else if(!selected){
+  g.strokeStyle=g.fillStyle=colors[prefs.accent]||colors.cyan;g.lineWidth=2;g.beginPath();
+  trace.forEach((r,i)=>{
+   if(!i || r.t-trace[i-1].t>15*60000)g.moveTo(x(i),y(r.v));
+   else g.lineTo(x(i),y(r.v));
+  });g.stroke();
+  trace.forEach((r,i)=>{
+   if(trace.length<80||i===trace.length-1||!i||r.t-trace[i-1].t>15*60000||trace[i+1].t-r.t>15*60000){
+    g.beginPath();g.arc(x(i),y(r.v),trace.length===1?4:2,0,Math.PI*2);g.fill();
+   }
+  });
+ }
  else{g.strokeStyle=colors[prefs.accent];g.lineWidth=2;g.beginPath();trace.forEach((r,i)=>i?g.lineTo(x(i),y(r.v)):g.moveTo(x(i),y(r.v)));g.stroke();const i=trace.length-1;g.fillStyle=g.strokeStyle;g.beginPath();g.arc(x(i),y(trace[i].v),3,0,Math.PI*2);g.fill();}
  if(stock&&prefs.markers){g.font='bold 10px system-ui';const step=minutes*60000,pos=new Map(trace.map((r,i)=>[r.t,i]));
  for(const e of statementEvents){if(e[2]!==selected)continue;const idx=pos.get(Math.floor(Date.parse(e[0])/step)*step);if(idx==null)continue;
@@ -303,7 +351,7 @@ for(const id of Object.keys(defaults).filter(k=>k!=='pins')){
 }
 $('settings').onclick=()=>$('prefs').showModal();$('done').onclick=()=>$('prefs').close();
 $('collapse').onclick=()=>{prefs.watchVisible=false;savePrefs();applyLayout();render();draw();};
-$('reset').onclick=()=>{prefs={...defaults,pins:[]};minute='5';savePrefs();setupWatch();applyLayout();selectSymbol('RELIANCE');};
+$('reset').onclick=()=>{prefs={...defaults,pins:[]};minute='5';savePrefs();setupWatch();applyLayout();selectSymbol('');};
 function expand(){const panel=$('panel');const active=panel.classList.toggle('expanded');$('full').textContent=active?'Exit expanded':'Expand';$('full').setAttribute('aria-expanded',String(active));draw();}
 $('full').onclick=expand;document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('panel').classList.contains('expanded'))expand();});
 $('connect').onclick=async()=>{
